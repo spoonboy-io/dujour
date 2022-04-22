@@ -1,0 +1,4 @@
+github.com/TwiN/go-color v1.1.0 h1:yhLAHgjp2iAxmNjDiVb6Z073NE65yoaPlcki1Q22yyQ=
+github.com/TwiN/go-color v1.1.0/go.mod h1:aKVf4e1mD4ai2FtPifkDPP5iyoCwiK08YGzGwerjKo0=
+github.com/spoonboy-io/koan v0.1.0 h1:TMxuDoAMwlVS3no8mjxixUgUUroO4Wvtf0lFcsc7e4g=
+github.com/spoonboy-io/koan v0.1.0/go.mod h1:QrBU2nmL9EEPfQykbLrjZs+M7PHRvgefUJpd4lUCWXo=
