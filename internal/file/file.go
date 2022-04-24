@@ -59,8 +59,8 @@ func InitDatasource(file string) internal.Datasource {
 }
 
 // LoadAndValidateDatasources finds, loads and validates all data at application startup
-func LoadAndValidateDatasources(dataFolder string, logger *koan.Logger) ([]internal.Datasource, error) {
-	datasources := []internal.Datasource{}
+func LoadAndValidateDatasources(dataFolder string, logger *koan.Logger) (map[string]internal.Datasource, error) {
+	datasources := map[string]internal.Datasource{}
 
 	files, err := FindFiles(dataFolder, logger)
 	if err != nil {
@@ -73,7 +73,7 @@ func LoadAndValidateDatasources(dataFolder string, logger *koan.Logger) ([]inter
 			logger.Error("error", err) // TODO tempory for debug
 			continue
 		}
-		datasources = append(datasources, ds)
+		datasources[fv] = ds
 	}
 
 	return datasources, nil

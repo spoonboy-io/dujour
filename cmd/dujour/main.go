@@ -21,6 +21,15 @@ func init() {
 	if err := os.MkdirAll(dataPath, os.ModePerm); err != nil {
 		logger.FatalError("problem checking/creating data folder", err)
 	}
+
+	// check/create certificates folder
+	tlsPath := filepath.Join(".", internal.TLS_FOLDER)
+	if err := os.MkdirAll(tlsPath, os.ModePerm); err != nil {
+		logger.FatalError("problem checking/creating 'certificates' folder", err)
+	}
+
+	// add self-signed certificate if folder empty
+	// TODO
 }
 
 func main() {
@@ -34,11 +43,21 @@ func main() {
 	// create a server running as service
 
 	// TODO remove debug
-	for _, v := range datasources {
-		fmt.Println("Datasource")
+	for k, v := range datasources {
+		fmt.Println("Datasource", k)
 		fmt.Println("-------------------")
-		fmt.Printf("\n%+v\n\n", v)
+		fmt.Printf("\n%+v\n\n", v.Data)
 		fmt.Println("------------------------------------------------")
 		fmt.Println("")
 	}
 }
+
+// TODO
+// LoadAndValidate value return rather than operate on pointer
+// generate the self-signed cert
+// implement logging messages for the validate/load operations
+// get tests in place on the work done so far
+// create the server which offers HTTPS using the cert
+// implement routing to server an API for the files
+// implement a watcher to reload/create new data when files are added to the data folder
+// revisit the camelcaseing for the map keys (will need to be recursive)
