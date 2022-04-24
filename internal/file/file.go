@@ -1,6 +1,7 @@
 package file
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/fs"
@@ -8,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/foolin/gocsv"
+	"github.com/gocarina/gocsv"
 
 	"github.com/spoonboy-io/dujour/internal"
 	"github.com/spoonboy-io/koan"
@@ -89,17 +90,21 @@ func LoadAndValidate(ds *internal.Datasource, logger *koan.Logger) error {
 
 	switch ds.FileType {
 	case internal.TYPE_CSV:
-		mp := []map[string]interface{}{}
-		// we use a module that loads and unmarshals under a Read operation
-		mp, err = gocsv.Read(ds.FileName, true)
+		// load the CSV data
+		data, err = os.ReadFile(ds.FileName)
 		if err != nil {
-			// bad data
+			return err
+		}
+
+		rdr := bytes.NewReader(data)
+		mp, err := gocsv.CSVToMaps(rdr)
+		if err != nil {
 			return err
 		}
 
 		// if good always array data when we have a CSV
 		ds.DataType = internal.DATA_ARR
-		ds.ArrData = mp
+		ds.Data = mp
 
 	case internal.TYPE_JSON:
 		// load the JSON data
@@ -119,11 +124,11 @@ func LoadAndValidate(ds *internal.Datasource, logger *koan.Logger) error {
 			}
 			// it was an object
 			ds.DataType = internal.DATA_OBJ
-			ds.ObjData = obj
+			ds.Data = obj
 		} else {
 			// it was an array
 			ds.DataType = internal.DATA_ARR
-			ds.ArrData = arr
+			ds.Data = arr
 		}
 	}
 
