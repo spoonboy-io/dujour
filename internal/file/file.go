@@ -36,6 +36,7 @@ func FindFiles(dataFolder string, logger *koan.Logger) ([]string, error) {
 		}
 		return nil
 	})
+
 	return files, nil
 }
 
@@ -69,7 +70,8 @@ func LoadAndValidateDatasources(dataFolder string, logger *koan.Logger) (map[str
 
 	for _, fv := range files {
 		ds := InitDatasource(fv)
-		if err := LoadAndValidate(&ds, logger); err != nil {
+		ds, err := LoadAndValidate(ds, logger)
+		if err != nil {
 			logger.Error("error", err) // TODO tempory for debug
 			continue
 		}
@@ -81,7 +83,7 @@ func LoadAndValidateDatasources(dataFolder string, logger *koan.Logger) (map[str
 
 // LoadAndValidate performs the load and validation at the individual datasource level for both JSON and CSV
 // file formats, it also logs non fatal warnings and errors which may prevent proper parsing of a datasource
-func LoadAndValidate(ds *internal.Datasource, logger *koan.Logger) error {
+func LoadAndValidate(ds internal.Datasource, logger *koan.Logger) (internal.Datasource, error) {
 
 	// TODO - log or return. We also need more log information
 
@@ -93,24 +95,23 @@ func LoadAndValidate(ds *internal.Datasource, logger *koan.Logger) error {
 		// load the CSV data
 		data, err = os.ReadFile(ds.FileName)
 		if err != nil {
-			return err
+			return ds, err
 		}
 
 		rdr := bytes.NewReader(data)
 		mp, err := gocsv.CSVToMaps(rdr)
 		if err != nil {
-			return err
+			return ds, err
 		}
 
 		// if good always array data when we have a CSV
 		ds.DataType = internal.DATA_ARR
 		ds.Data = mp
-
 	case internal.TYPE_JSON:
 		// load the JSON data
 		data, err = os.ReadFile(ds.FileName)
 		if err != nil {
-			return err
+			return ds, err
 		}
 
 		// we potentially need to handle array and object when dealing with unknown JSON
@@ -132,5 +133,5 @@ func LoadAndValidate(ds *internal.Datasource, logger *koan.Logger) error {
 		}
 	}
 
-	return nil
+	return ds, nil
 }

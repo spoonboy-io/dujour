@@ -53,7 +53,6 @@ func main() {
 }
 
 // TODO
-// LoadAndValidate value return rather than operate on pointer
 // generate the self-signed cert
 // implement logging messages for the validate/load operations
 // get tests in place on the work done so far
