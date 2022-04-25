@@ -2,4 +2,6 @@
 /.idea
 
 data/
+certs/
 dist/
+

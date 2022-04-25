@@ -121,7 +121,7 @@ func LoadAndValidate(ds internal.Datasource, logger *koan.Logger) (internal.Data
 		if err = json.Unmarshal(data, &arr); err != nil {
 			// we 'may' have an object or it could just be bad data
 			if err = json.Unmarshal(data, &obj); err != nil {
-				return err
+				return ds, err
 			}
 			// it was an object
 			ds.DataType = internal.DATA_OBJ

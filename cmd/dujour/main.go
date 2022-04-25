@@ -1,9 +1,15 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
+	"time"
+
+	"github.com/gorilla/mux"
+	"github.com/spoonboy-io/dujour/internal/certificate"
 
 	"github.com/spoonboy-io/dujour/internal"
 
@@ -19,44 +25,75 @@ func init() {
 	// check/create data folder
 	dataPath := filepath.Join(".", internal.DATA_FOLDER)
 	if err := os.MkdirAll(dataPath, os.ModePerm); err != nil {
-		logger.FatalError("problem checking/creating data folder", err)
+		logger.FatalError("Problem checking/creating data folder", err)
 	}
 
 	// check/create certificates folder
 	tlsPath := filepath.Join(".", internal.TLS_FOLDER)
 	if err := os.MkdirAll(tlsPath, os.ModePerm); err != nil {
-		logger.FatalError("problem checking/creating 'certificates' folder", err)
+		logger.FatalError("Problem checking/creating 'certificates' folder", err)
 	}
 
-	// add self-signed certificate if folder empty
-	// TODO
+	// add self-signed certificate only if folder empty, if the cert expires it
+	// it can be deleted so the code here create a new cert.pem and key.pem files
+	checkExist := fmt.Sprintf("%s/cert.pem", internal.TLS_FOLDER)
+	if _, err := os.Stat(checkExist); errors.Is(err, os.ErrNotExist) {
+		logger.Info("Creating self-signed TLS certificate for the server")
+		if err := certificate.Make(logger); err != nil {
+			logger.FatalError("Problem creating the certificate/key", err)
+		}
+	}
 }
 
 func main() {
 	datasources, err := file.LoadAndValidateDatasources(internal.DATA_FOLDER, logger)
 	if err != nil {
-		logger.FatalError("problem loading data sources", err)
+		logger.FatalError("Problem loading data sources", err)
 	}
 
 	// add a watch to the folder for hot reload
 
+	// router for testing
+	mux := mux.NewRouter()
+	mux.HandleFunc("/", Home).Methods("GET")
+
 	// create a server running as service
+	hostPort := fmt.Sprintf("%s:%s", internal.SRV_HOST, internal.SRV_PORT)
+	srvTLS := &http.Server{
+		Addr:         hostPort,
+		Handler:      mux,
+		ReadTimeout:  3 * time.Second,
+		WriteTimeout: 5 * time.Second,
+	}
+
+	// start HTTPS server
+	logger.Info(fmt.Sprintf("Starting HTTPS server on %s", hostPort))
+	if err := srvTLS.ListenAndServeTLS(fmt.Sprintf("%s/cert.pem", internal.TLS_FOLDER), fmt.Sprintf("%s/key.pem", internal.TLS_FOLDER)); err != nil {
+		logger.FatalError("Failed to start HTTPS server", err)
+	}
 
 	// TODO remove debug
-	for k, v := range datasources {
-		fmt.Println("Datasource", k)
-		fmt.Println("-------------------")
-		fmt.Printf("\n%+v\n\n", v.Data)
-		fmt.Println("------------------------------------------------")
-		fmt.Println("")
-	}
+	_ = datasources
+	/*
+		for k, v := range datasources {
+			fmt.Println("Datasource", k)
+			fmt.Println("-------------------")
+			fmt.Printf("\n%+v\n\n", v.Data)
+			fmt.Println("------------------------------------------------")
+			fmt.Println("")
+		}
+	*/
+
+}
+
+// Test the TLS certificate
+func Home(w http.ResponseWriter, r *http.Request) {
+	_, _ = w.Write([]byte("Serving over TLS"))
 }
 
 // TODO
-// generate the self-signed cert
 // implement logging messages for the validate/load operations
 // get tests in place on the work done so far
-// create the server which offers HTTPS using the cert
 // implement routing to server an API for the files
 // implement a watcher to reload/create new data when files are added to the data folder
 // revisit the camelcaseing for the map keys (will need to be recursive)

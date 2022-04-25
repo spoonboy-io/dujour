@@ -2,5 +2,7 @@ github.com/TwiN/go-color v1.1.0 h1:yhLAHgjp2iAxmNjDiVb6Z073NE65yoaPlcki1Q22yyQ=
 github.com/TwiN/go-color v1.1.0/go.mod h1:aKVf4e1mD4ai2FtPifkDPP5iyoCwiK08YGzGwerjKo0=
 github.com/gocarina/gocsv v0.0.0-20220422102445-f48ffd81e276 h1:itXwG7hIwd5UCoI4R0YsqkcjoI6Wg/m/kLhfJLLdQ/I=
 github.com/gocarina/gocsv v0.0.0-20220422102445-f48ffd81e276/go.mod h1:5YoVOkjYAQumqlV356Hj3xeYh4BdZuLE0/nRkf2NKkI=
+github.com/gorilla/mux v1.8.0 h1:i40aqfkR1h2SlN9hojwV5ZA91wcXFOvkdNIeFDP5koI=
+github.com/gorilla/mux v1.8.0/go.mod h1:DVbg23sWSpFRCP0SfiEN6jmj59UnW/n46BH5rLB71So=
 github.com/spoonboy-io/koan v0.1.0 h1:TMxuDoAMwlVS3no8mjxixUgUUroO4Wvtf0lFcsc7e4g=
 github.com/spoonboy-io/koan v0.1.0/go.mod h1:QrBU2nmL9EEPfQykbLrjZs+M7PHRvgefUJpd4lUCWXo=
