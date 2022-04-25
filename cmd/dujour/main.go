@@ -9,12 +9,16 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/spoonboy-io/dujour/internal/certificate"
-
 	"github.com/spoonboy-io/dujour/internal"
-
+	"github.com/spoonboy-io/dujour/internal/banner"
+	"github.com/spoonboy-io/dujour/internal/certificate"
 	"github.com/spoonboy-io/dujour/internal/file"
 	"github.com/spoonboy-io/koan"
+)
+
+var (
+	version   = "Development build"
+	goversion = "Unknown"
 )
 
 var logger *koan.Logger
@@ -46,9 +50,25 @@ func init() {
 }
 
 func main() {
+	// console banner
+	banner.WriteSimple(banner.Banner{
+		Name:         "Dujour",
+		Description:  "JSON/CSV Data Server",
+		Version:      version,
+		GoVersion:    goversion,
+		WebsiteURL:   "https://spoonboy.io",
+		VcsURL:       "https://github.com/spoonboy-io/dujour",
+		VcsName:      "Github",
+		EmailAddress: "hello@spoonboy.io",
+	})
+
 	datasources, err := file.LoadAndValidateDatasources(internal.DATA_FOLDER, logger)
 	if err != nil {
 		logger.FatalError("Problem loading data sources", err)
+	}
+
+	if len(datasources) == 0 {
+		logger.Warn(fmt.Sprintf("Currently there are datasources to serve, add JSON or CSV files to the '%s' folder", internal.DATA_FOLDER))
 	}
 
 	// add a watch to the folder for hot reload

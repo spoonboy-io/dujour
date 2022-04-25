@@ -31,7 +31,7 @@ func FindFiles(dataFolder string, logger *koan.Logger) ([]string, error) {
 			files = append(files, s)
 		} else {
 			if extension != "" {
-				logger.Warn(fmt.Sprintf("Skipping file: '%s', (file extension '%s')", f.Name(), extension))
+				logger.Warn(fmt.Sprintf("Skipping file '%s/%s', file extension is '%s'", dataFolder, f.Name(), extension))
 			}
 		}
 		return nil
@@ -62,6 +62,8 @@ func InitDatasource(file string) internal.Datasource {
 // LoadAndValidateDatasources finds, loads and validates all data at application startup
 func LoadAndValidateDatasources(dataFolder string, logger *koan.Logger) (map[string]internal.Datasource, error) {
 	datasources := map[string]internal.Datasource{}
+
+	logger.Info("Loading datasources")
 
 	files, err := FindFiles(dataFolder, logger)
 	if err != nil {
@@ -133,5 +135,6 @@ func LoadAndValidate(ds internal.Datasource, logger *koan.Logger) (internal.Data
 		}
 	}
 
+	logger.Info(fmt.Sprintf("Successfully loaded file '%s'", ds.FileName))
 	return ds, nil
 }
