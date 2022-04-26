@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
+
+	"github.com/gorilla/mux"
 
 	"github.com/spoonboy-io/dujour/internal"
 	"github.com/spoonboy-io/koan"
@@ -65,13 +68,43 @@ func (a *App) ListDatasources(w http.ResponseWriter, r *http.Request) {
 func (a *App) DatasourceGetAll(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
-	_, _ = w.Write([]byte("GetAll"))
+
+	vars := mux.Vars(r)
+	dsReq := strings.ToLower(vars["datasource"])
+
+	// this is suboptimal, but key is used to store the filename and we use the key in
+	// hotreload add/delete operations, so we have to iterate and match endpoint for now
+	foundMarker := false
+	var res []byte
+	var err error
+	for _, v := range a.Datasources {
+		if v.EndpointName == dsReq {
+			foundMarker = true
+			res, err = json.MarshalIndent(v.Data, "", "  ")
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+		}
+	}
+
+	if !foundMarker {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_, _ = fmt.Fprint(w, string(res))
 }
 
 func (a *App) DatasourceGetByID(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	/*w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
-	_, _ = w.Write([]byte("Get By ID"))
+
+	vars := mux.Vars(r)
+	dSReq := vars["datasource"]
+	id := vars["id"]
+
+	_, _ = w.Write([]byte("Get By ID"))*/
 }
 
 func setHeaders() {}
