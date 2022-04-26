@@ -9,6 +9,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/spoonboy-io/dujour/internal/routes"
+
 	"github.com/spoonboy-io/dujour/internal/watcher"
 
 	"github.com/gorilla/mux"
@@ -84,10 +86,19 @@ func main() {
 		}
 	}()
 
-	// router for testing
+	// we need three handlers, they need logger and datasources
 	mux := mux.NewRouter()
-	mux.HandleFunc("/", Home).Methods("GET")
+	app := &routes.App{
+		logger,
+		datasources,
+	}
 
+	mux.HandleFunc(`/`, app.Home).Methods("GET")
+	mux.HandleFunc(`/list`, app.ListDatasources).Methods("GET")
+	mux.HandleFunc("/{datasource:[a-zA-Z0-9=\\-\\/]+}/{id:[a-zA-Z0-9=\\-\\/]+}", app.DatasourceGetByID).Methods("GET")
+	mux.HandleFunc("/{datasource:[a-zA-Z0-9=\\-\\/]+}", app.DatasourceGetAll).Methods("GET")
+
+	//muxTLS.HandleFunc(`/account/geofence/edit/{id:[a-zA-Z0-9=\-\/]+}`, AccountEditGeofence).Methods("GET")
 	// create a server running as service
 	hostPort := fmt.Sprintf("%s:%s", internal.SRV_HOST, internal.SRV_PORT)
 	srvTLS := &http.Server{
@@ -102,28 +113,9 @@ func main() {
 	if err := srvTLS.ListenAndServeTLS(fmt.Sprintf("%s/cert.pem", internal.TLS_FOLDER), fmt.Sprintf("%s/key.pem", internal.TLS_FOLDER)); err != nil {
 		logger.FatalError("Failed to start HTTPS server", err)
 	}
-
-	// TODO remove debug
-	_ = datasources
-	/*
-		for k, v := range datasources {
-			fmt.Println("Datasource", k)
-			fmt.Println("-------------------")
-			fmt.Printf("\n%+v\n\n", v.Data)
-			fmt.Println("------------------------------------------------")
-			fmt.Println("")
-		}
-	*/
-
-}
-
-// Test the TLS certificate
-func Home(w http.ResponseWriter, r *http.Request) {
-	_, _ = w.Write([]byte("Serving over TLS"))
 }
 
 // TODO
 // implement logging messages for the validate/load operations
 // get tests in place on the work done so far
-// implement routing to server an API for the files
 // revisit the camelcaseing for the map keys (will need to be recursive)
