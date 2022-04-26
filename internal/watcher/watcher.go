@@ -58,13 +58,7 @@ func Monitor(datasources map[string]internal.Datasource, logger *koan.Logger, mt
 					mtx.Lock()
 					datasources[event.Name] = hlds
 					mtx.Unlock()
-				case fsnotify.Rename:
-					logger.Info(fmt.Sprintf("Hotloader file removed '%s'", event.Name))
-					// remove
-					mtx.Lock()
-					delete(datasources, event.Name)
-					mtx.Unlock()
-				case fsnotify.Remove:
+				case fsnotify.Rename, fsnotify.Remove:
 					logger.Info(fmt.Sprintf("Hotloader file removed '%s'", event.Name))
 					// remove
 					mtx.Lock()
