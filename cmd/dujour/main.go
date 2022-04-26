@@ -98,7 +98,6 @@ func main() {
 	mux.HandleFunc("/{datasource:[a-zA-Z0-9=\\-\\/]+}/{id:[a-zA-Z0-9=\\-\\/]+}", app.DatasourceGetByID).Methods("GET")
 	mux.HandleFunc("/{datasource:[a-zA-Z0-9=\\-\\/]+}", app.DatasourceGetAll).Methods("GET")
 
-	//muxTLS.HandleFunc(`/account/geofence/edit/{id:[a-zA-Z0-9=\-\/]+}`, AccountEditGeofence).Methods("GET")
 	// create a server running as service
 	hostPort := fmt.Sprintf("%s:%s", internal.SRV_HOST, internal.SRV_PORT)
 	srvTLS := &http.Server{
@@ -116,6 +115,8 @@ func main() {
 }
 
 // TODO
+// getAll and getByID handlers
+// get a record count when loading validating a datasource
 // implement logging messages for the validate/load operations
 // get tests in place on the work done so far
 // revisit the camelcaseing for the map keys (will need to be recursive)
