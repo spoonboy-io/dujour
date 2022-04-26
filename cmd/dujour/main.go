@@ -6,7 +6,10 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
+
+	"github.com/spoonboy-io/dujour/internal/watcher"
 
 	"github.com/gorilla/mux"
 	"github.com/spoonboy-io/dujour/internal"
@@ -50,6 +53,9 @@ func init() {
 }
 
 func main() {
+
+	mtx := &sync.Mutex{}
+
 	// write a console banner
 	reprise.WriteSimple(&reprise.Banner{
 		Name:         "Dujour",
@@ -71,7 +77,12 @@ func main() {
 		logger.Warn(fmt.Sprintf("Currently there are datasources to serve, add JSON or CSV files to the '%s' folder", internal.DATA_FOLDER))
 	}
 
-	// add a watch to the folder for hot reload
+	// add watch to the dta folder for hot reload using a goroutine
+	go func() {
+		if err := watcher.Monitor(datasources, logger, mtx); err != nil {
+			logger.FatalError("Could not create the file watcher", err)
+		}
+	}()
 
 	// router for testing
 	mux := mux.NewRouter()
@@ -115,5 +126,4 @@ func Home(w http.ResponseWriter, r *http.Request) {
 // implement logging messages for the validate/load operations
 // get tests in place on the work done so far
 // implement routing to server an API for the files
-// implement a watcher to reload/create new data when files are added to the data folder
 // revisit the camelcaseing for the map keys (will need to be recursive)
