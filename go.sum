@@ -6,3 +6,5 @@ github.com/gorilla/mux v1.8.0 h1:i40aqfkR1h2SlN9hojwV5ZA91wcXFOvkdNIeFDP5koI=
 github.com/gorilla/mux v1.8.0/go.mod h1:DVbg23sWSpFRCP0SfiEN6jmj59UnW/n46BH5rLB71So=
 github.com/spoonboy-io/koan v0.1.0 h1:TMxuDoAMwlVS3no8mjxixUgUUroO4Wvtf0lFcsc7e4g=
 github.com/spoonboy-io/koan v0.1.0/go.mod h1:QrBU2nmL9EEPfQykbLrjZs+M7PHRvgefUJpd4lUCWXo=
+github.com/spoonboy-io/reprise v0.0.1 h1:cwl0ejT0GTe1Cqk8lx27Imn3O940D3ztwygFHxknDhc=
+github.com/spoonboy-io/reprise v0.0.1/go.mod h1:t4PgU58+cSx4MyA4Ra8nPUIovQq+vZCCn4MUt47B0fw=

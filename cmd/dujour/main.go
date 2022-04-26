@@ -10,10 +10,10 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/spoonboy-io/dujour/internal"
-	"github.com/spoonboy-io/dujour/internal/banner"
 	"github.com/spoonboy-io/dujour/internal/certificate"
 	"github.com/spoonboy-io/dujour/internal/file"
 	"github.com/spoonboy-io/koan"
+	"github.com/spoonboy-io/reprise"
 )
 
 var (
@@ -50,8 +50,8 @@ func init() {
 }
 
 func main() {
-	// console banner
-	banner.WriteSimple(banner.Banner{
+	// write a console banner
+	reprise.WriteSimple(&reprise.Banner{
 		Name:         "Dujour",
 		Description:  "JSON/CSV Data Server",
 		Version:      version,
