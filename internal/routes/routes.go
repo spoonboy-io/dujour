@@ -145,7 +145,7 @@ func (a *App) DatasourceGetByID(w http.ResponseWriter, r *http.Request) {
 					}
 					// key could be integer
 					if fid, ok := v1["id"].(int); ok {
-						if string(fid) == id {
+						if fmt.Sprint(fid) == id {
 							foundMarker = true
 							res, err = json.MarshalIndent(v1, "", "  ")
 							if err != nil {
@@ -179,7 +179,7 @@ func (a *App) DatasourceGetByID(w http.ResponseWriter, r *http.Request) {
 								}
 								// key could be integer
 								if fid, ok := v4["id"].(int); ok {
-									if string(fid) == id {
+									if fmt.Sprint(fid) == id {
 										foundMarker = true
 										res, err = json.MarshalIndent(v4, "", "  ")
 										if err != nil {
