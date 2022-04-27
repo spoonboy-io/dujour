@@ -26,8 +26,7 @@ consumable JSON REST API is a requirement.
 - Data is served from memory. Fast
 
 ### Usage
-Add `.json` and `.csv` data files to the `data` directory and Dujour will automatically load, validate and serve each data file as a REST API endpoint
-in JSON format.
+Add `.json` and `.csv` data files to the `data` directory and Dujour will automatically load, validate and serve each data file at two REST API endpoints in JSON format.
 
 In each data file, element/row data should contain an `id` key/column which should be unique in the dataset.
 
