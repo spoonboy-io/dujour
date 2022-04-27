@@ -56,7 +56,6 @@ func init() {
 }
 
 func main() {
-
 	mtx := &sync.Mutex{}
 
 	// write a console banner
@@ -117,7 +116,4 @@ func main() {
 }
 
 // TODO
-// implement logging messages for the validate/load operations
 // get tests in place on the work done so far
-// revisit the camelcaseing for the map keys (will need to be recursive)
-// datasource must have ID

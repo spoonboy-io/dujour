@@ -20,7 +20,7 @@ import (
 func FindFiles(dataFolder string, logger *koan.Logger) ([]string, error) {
 	var files []string
 	dataPath := filepath.Join(".", dataFolder)
-	filepath.WalkDir(dataPath, func(s string, f fs.DirEntry, err error) error {
+	_ = filepath.WalkDir(dataPath, func(s string, f fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -73,7 +73,7 @@ func LoadAndValidateDatasources(dataFolder string, logger *koan.Logger) (map[str
 		ds := InitDatasource(fv)
 		ds, err := LoadAndValidate(ds, logger)
 		if err != nil {
-			logger.Error("error", err) // TODO tempory for debug
+			logger.Error(fmt.Sprintf("Could not load datasource '%s'", fv), err)
 			continue
 		}
 		datasources[fv] = ds
@@ -85,9 +85,6 @@ func LoadAndValidateDatasources(dataFolder string, logger *koan.Logger) (map[str
 // LoadAndValidate performs the load and validation at the individual datasource level for both JSON and CSV
 // file formats, it also logs non fatal warnings and errors which may prevent proper parsing of a datasource
 func LoadAndValidate(ds internal.Datasource, logger *koan.Logger) (internal.Datasource, error) {
-
-	// TODO - log or return. We also need more log information
-
 	var err error
 	var data []byte
 
@@ -105,8 +102,6 @@ func LoadAndValidate(ds internal.Datasource, logger *koan.Logger) (internal.Data
 			return ds, err
 		}
 
-		// if good always array data when we have a CSV
-		ds.DataType = internal.DATA_ARR
 		ds.Data = mp
 	case internal.TYPE_JSON:
 		// load the JSON data
@@ -125,11 +120,9 @@ func LoadAndValidate(ds internal.Datasource, logger *koan.Logger) (internal.Data
 				return ds, err
 			}
 			// it was an object
-			ds.DataType = internal.DATA_OBJ
 			ds.Data = obj
 		} else {
 			// it was an array
-			ds.DataType = internal.DATA_ARR
 			ds.Data = arr
 		}
 	}

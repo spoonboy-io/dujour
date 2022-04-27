@@ -52,7 +52,7 @@ func Monitor(datasources map[string]internal.Datasource, logger *koan.Logger, mt
 					var hlds internal.Datasource
 					var err error
 					if hlds, err = file.LoadAndValidate(file.InitDatasource(event.Name), logger); err != nil {
-						logger.Warn(fmt.Sprintf("Could not hotload datasource '%s'", event.Name))
+						logger.Error(fmt.Sprintf("Could not hotload datasource '%s'", event.Name), err)
 					}
 
 					// add the datasource
