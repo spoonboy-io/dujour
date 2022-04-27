@@ -61,7 +61,9 @@ func (a *App) ListDatasources(w http.ResponseWriter, r *http.Request) {
 
 	res, err := json.MarshalIndent(list, "", "  ")
 	if err != nil {
+		a.Logger.Error("Marshalling ListDatasources:", err)
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	a.Logger.Info("Served GET /list request - 200 OK")
@@ -75,9 +77,6 @@ func (a *App) DatasourceGetAll(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	dsReq := strings.ToLower(vars["datasource"])
-
-	// this is suboptimal, but key is used to store the filename and we use the key in
-	// hotreload add/delete operations, so we have to iterate and match endpoint for now
 	foundMarker := false
 	var res []byte
 	var err error
@@ -89,13 +88,17 @@ func (a *App) DatasourceGetAll(w http.ResponseWriter, r *http.Request) {
 			foundMarker = true
 			res, err = json.MarshalIndent(v.Data, "", "  ")
 			if err != nil {
+				a.Logger.Error("Marshaling DatasourceGetAll:", err)
 				w.WriteHeader(http.StatusInternalServerError)
+				return
 			}
 		}
 	}
 	a.Mtx.Unlock()
 
 	if !foundMarker {
+		logMsg := fmt.Sprintf("Served GET /%s request - 404 Not Found", dsReq)
+		a.Logger.Info(logMsg)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
@@ -126,6 +129,7 @@ func (a *App) DatasourceGetByID(w http.ResponseWriter, r *http.Request) {
 			// need a type assertion to discover what we have need to parse
 			switch v.Data.(type) {
 			case []map[string]interface{}:
+				// 1
 				for _, v1 := range v.Data.([]map[string]interface{}) {
 					// key could be string
 					if fid, ok := v1["id"].(string); ok {
@@ -133,6 +137,7 @@ func (a *App) DatasourceGetByID(w http.ResponseWriter, r *http.Request) {
 							foundMarker = true
 							res, err = json.MarshalIndent(v1, "", "  ")
 							if err != nil {
+								a.Logger.Error("Marshaling DatasourceGetByID (case 1, string):", err)
 								w.WriteHeader(http.StatusInternalServerError)
 								return
 							}
@@ -144,6 +149,7 @@ func (a *App) DatasourceGetByID(w http.ResponseWriter, r *http.Request) {
 							foundMarker = true
 							res, err = json.MarshalIndent(v1, "", "  ")
 							if err != nil {
+								a.Logger.Error("Marshaling DatasourceGetByID (case 1, int):", err)
 								w.WriteHeader(http.StatusInternalServerError)
 								return
 							}
@@ -152,6 +158,7 @@ func (a *App) DatasourceGetByID(w http.ResponseWriter, r *http.Request) {
 
 				}
 			case map[string]interface{}:
+				// 2
 				for _, v1 := range v.Data.(map[string]interface{}) {
 					// the value stored should a slice otherwise we don't have a list of data, only an object
 					if v2, ok := v1.([]interface{}); ok {
@@ -164,6 +171,7 @@ func (a *App) DatasourceGetByID(w http.ResponseWriter, r *http.Request) {
 										foundMarker = true
 										res, err = json.MarshalIndent(v4, "", "  ")
 										if err != nil {
+											a.Logger.Error("Marshaling DatasourceGetByID (case 2, sttring):", err)
 											w.WriteHeader(http.StatusInternalServerError)
 											return
 										}
@@ -175,6 +183,7 @@ func (a *App) DatasourceGetByID(w http.ResponseWriter, r *http.Request) {
 										foundMarker = true
 										res, err = json.MarshalIndent(v4, "", "  ")
 										if err != nil {
+											a.Logger.Error("Marshaling DatasourceGetByID (case 2, int):", err)
 											w.WriteHeader(http.StatusInternalServerError)
 											return
 										}
@@ -185,12 +194,14 @@ func (a *App) DatasourceGetByID(w http.ResponseWriter, r *http.Request) {
 					}
 				}
 			case []map[string]string:
+				// 3
 				for _, v := range v.Data.([]map[string]string) {
 					if fid, ok := v["id"]; ok {
 						if fid == id {
 							foundMarker = true
 							res, err = json.MarshalIndent(v, "", "  ")
 							if err != nil {
+								a.Logger.Error("Marshaling DatasourceGetByID (case 3):", err)
 								w.WriteHeader(http.StatusInternalServerError)
 								return
 							}
@@ -199,6 +210,7 @@ func (a *App) DatasourceGetByID(w http.ResponseWriter, r *http.Request) {
 				}
 			default:
 				// something has gone wrong
+				a.Logger.Warn("DatasourceGetByID unexpected Type. Unhandled")
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
@@ -207,6 +219,8 @@ func (a *App) DatasourceGetByID(w http.ResponseWriter, r *http.Request) {
 	a.Mtx.Unlock()
 
 	if !foundMarker {
+		logMsg := fmt.Sprintf("Served GET /%s/%s request - 404 Not Found", dsReq, id)
+		a.Logger.Info(logMsg)
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
