@@ -1,5 +1,5 @@
 run:
-	go run ./cmd/dujour/*.go
+	go run -race ./cmd/dujour/*.go
 
 test:
 	go test -v --cover ./...
