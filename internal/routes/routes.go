@@ -19,7 +19,7 @@ type App struct {
 	Mtx         *sync.Mutex
 }
 
-func (a *App) Home(w http.ResponseWriter, r *http.Request) {
+func (a *App) Home(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "text/text")
 
@@ -35,7 +35,7 @@ func (a *App) Home(w http.ResponseWriter, r *http.Request) {
 	_, _ = fmt.Fprint(w, res)
 }
 
-func (a *App) ListDatasources(w http.ResponseWriter, r *http.Request) {
+func (a *App) ListDatasources(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 
