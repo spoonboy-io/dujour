@@ -20,10 +20,10 @@ consumable API is a requirement.
 ### Features
 
 - Automatic self-signed TLS certificate (or use your own)
-- Data is served from memory cache
-- Supports any number of *.json and *.csv files
-- Hot reload, new or edited data, with no restarts
-
+- Supports CSV files. Application will parse them to JSON
+- Supports any number of JSON or CSV data files, memory being the only constraint
+- Hot reload. New or edited data can be added with no server restart needed
+- Data is served from memory. Fast
 
 ### Usage
 Add `.json` and `.csv` data files to the `data` directory and Dujour will automatically load, validate and serve each data file as a REST API endpoint
