@@ -91,6 +91,7 @@ func main() {
 	app := &routes.App{
 		logger,
 		datasources,
+		mtx,
 	}
 
 	mux.HandleFunc(`/`, app.Home).Methods("GET")
@@ -115,8 +116,7 @@ func main() {
 }
 
 // TODO
-// getAll and getByID handlers
-// get a record count when loading validating a datasource
 // implement logging messages for the validate/load operations
 // get tests in place on the work done so far
 // revisit the camelcaseing for the map keys (will need to be recursive)
+// datasource must have ID

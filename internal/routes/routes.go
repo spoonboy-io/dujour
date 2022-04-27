@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"sync"
 
 	"github.com/gorilla/mux"
 
@@ -15,6 +16,7 @@ import (
 type App struct {
 	Logger      *koan.Logger
 	Datasources map[string]internal.Datasource
+	Mtx         *sync.Mutex
 }
 
 func (a *App) Home(w http.ResponseWriter, r *http.Request) {
@@ -29,6 +31,7 @@ func (a *App) Home(w http.ResponseWriter, r *http.Request) {
 	res += "GET /{datasource} \t- JSON representing all elements/rows for requested {datasource} or 404\n"
 	res += "GET /{datasource}/{id} \t- JSON representing element/row matching {id} from requested {datasource} or 404\n"
 
+	a.Logger.Info("Served GET / reques - 200 OK")
 	_, _ = fmt.Fprint(w, res)
 }
 
@@ -40,27 +43,28 @@ func (a *App) ListDatasources(w http.ResponseWriter, r *http.Request) {
 	type listDS struct {
 		Endpoint string `json:"endpoint"`
 		Source   string `json:"source"`
-		Elements int    `json:"elements"`
 	}
 
 	list := []listDS{}
 
 	// iterate the datasources
+	a.Mtx.Lock()
 	for _, v := range a.Datasources {
 		ds := listDS{
 			v.EndpointName,
 			v.FileName,
-			0, // need to add this
 		}
 
 		list = append(list, ds)
 	}
+	a.Mtx.Unlock()
 
 	res, err := json.MarshalIndent(list, "", "  ")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
+	a.Logger.Info("Served GET /list request - 200 OK")
 	w.WriteHeader(http.StatusOK)
 	_, _ = fmt.Fprint(w, string(res))
 }
@@ -77,6 +81,9 @@ func (a *App) DatasourceGetAll(w http.ResponseWriter, r *http.Request) {
 	foundMarker := false
 	var res []byte
 	var err error
+
+	// we are reading from the map, should not need mutex but adding
+	a.Mtx.Lock()
 	for _, v := range a.Datasources {
 		if v.EndpointName == dsReq {
 			foundMarker = true
@@ -86,51 +93,126 @@ func (a *App) DatasourceGetAll(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+	a.Mtx.Unlock()
 
 	if !foundMarker {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
+	logMsg := fmt.Sprintf("Served GET /%s request - 200 OK", dsReq)
+	a.Logger.Info(logMsg)
 	w.WriteHeader(http.StatusOK)
 	_, _ = fmt.Fprint(w, string(res))
 }
 
+// DatasourceGetByID will process a request for a datasource and return the element that matches the ID
 func (a *App) DatasourceGetByID(w http.ResponseWriter, r *http.Request) {
-	/*w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 
 	vars := mux.Vars(r)
-	dSReq := vars["datasource"]
+	dsReq := vars["datasource"]
 	id := vars["id"]
 
-	_, _ = w.Write([]byte("Get By ID"))*/
-}
+	foundMarker := false
+	var res []byte
+	var err error
 
-func setHeaders() {}
+	a.Mtx.Lock()
+	for _, v := range a.Datasources {
+		if v.EndpointName == dsReq {
+			// we have the datasource but what about the id?
+			// need a type assertion to discover what we have need to parse
+			switch v.Data.(type) {
+			case []map[string]interface{}:
+				for _, v1 := range v.Data.([]map[string]interface{}) {
+					// key could be string
+					if fid, ok := v1["id"].(string); ok {
+						if fid == id {
+							foundMarker = true
+							res, err = json.MarshalIndent(v1, "", "  ")
+							if err != nil {
+								w.WriteHeader(http.StatusInternalServerError)
+								return
+							}
+						}
+					}
+					// key could be integer
+					if fid, ok := v1["id"].(int); ok {
+						if string(fid) == id {
+							foundMarker = true
+							res, err = json.MarshalIndent(v1, "", "  ")
+							if err != nil {
+								w.WriteHeader(http.StatusInternalServerError)
+								return
+							}
+						}
+					}
 
-/*
-func DeleteGeofence(w http.ResponseWriter, r *http.Request) {
-	// Secure this route, must be logged in
-	if session.Values["loggedIn"] != true {
-		http.Redirect(w, r, "https://"+DOMAIN+PORTTLS, http.StatusFound)
+				}
+			case map[string]interface{}:
+				for _, v1 := range v.Data.(map[string]interface{}) {
+					// the value stored should a slice otherwise we don't have a list of data, only an object
+					if v2, ok := v1.([]interface{}); ok {
+						for _, v3 := range v2 {
+							if v4, ok := v3.(map[string]interface{}); ok {
+								// we can now inspect v4 for data
+								// key could be string
+								if fid, ok := v4["id"].(string); ok {
+									if fid == id {
+										foundMarker = true
+										res, err = json.MarshalIndent(v4, "", "  ")
+										if err != nil {
+											w.WriteHeader(http.StatusInternalServerError)
+											return
+										}
+									}
+								}
+								// key could be integer
+								if fid, ok := v4["id"].(int); ok {
+									if string(fid) == id {
+										foundMarker = true
+										res, err = json.MarshalIndent(v4, "", "  ")
+										if err != nil {
+											w.WriteHeader(http.StatusInternalServerError)
+											return
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			case []map[string]string:
+				for _, v := range v.Data.([]map[string]string) {
+					if fid, ok := v["id"]; ok {
+						if fid == id {
+							foundMarker = true
+							res, err = json.MarshalIndent(v, "", "  ")
+							if err != nil {
+								w.WriteHeader(http.StatusInternalServerError)
+								return
+							}
+						}
+					}
+				}
+			default:
+				// something has gone wrong
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+		}
+	}
+	a.Mtx.Unlock()
+
+	if !foundMarker {
+		w.WriteHeader(http.StatusNotFound)
+		return
 	}
 
-	vars := mux.Vars(r)
-	fenceID := vars["id"]
-	userKey := session.Values["key"].(string)
-	err := db.DeleteGeofence(fenceID, userKey)
-
-	if err != nil {
-		session.AddFlash("There was a problem, the geofence could not be deleted", "error")
-	} else {
-		session.AddFlash("Geofence was successfully deleted", "confirm")
-	}
-
-	// Save session
-	session.Save(r, w)
-
-	// Perform redirect
-	http.Redirect(w, r, "https://"+DOMAIN+PORTTLS+"/account", http.StatusFound)
+	logMsg := fmt.Sprintf("Served GET /%s/%s request - 200 OK", dsReq, id)
+	a.Logger.Info(logMsg)
+	w.WriteHeader(http.StatusOK)
+	_, _ = fmt.Fprint(w, string(res))
 }
-*/
