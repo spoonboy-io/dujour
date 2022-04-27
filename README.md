@@ -23,3 +23,40 @@ consumable API is a requirement.
 - Data is served from memory cache
 - Supports any number of *.json and *.csv files
 - Hot reload, new or edited data, with no restarts
+
+
+### Usage
+Add `.json` and `.csv` data files to the `data` directory and Dujour will automatically load, validate and serve each data file as a REST API endpoint
+in JSON format.
+
+In each data file, element/row data should contain an `id` key/column which should be unique in the dataset.
+
+Data is loaded and served from an in-memory cache. No restart of the server is required when adding new data. Adding a new file of same name will cause the cache to be cleared and the data reloaded.
+
+The filename of each data file determines the API endpoints which are created. For example, for a file named `users.json` (not case sensitive), Dujour will serve data at two endpoints:-
+
+#### Get all users
+This endpoint will retrieve all users:
+```
+GET $serverUrl:18651/users
+```
+
+####Get a specific user
+This endpoint will retrieve a specific user:
+```
+GET $serverUrl:18651/users/$id
+```
+
+### Installation
+Grab the tar.gz or zip archive for your OS from the [releases page here]((https://github.com/spoonboy-io/dujour/releases/latest).
+
+Unpack it to the target host, and then start the server!
+
+To update, stop the server, replace the binary, start the server.
+
+### Limitations
+
+Dujour does not perform mutations on the data files. Only `GET` operations are supported.
+
+### License
+Licensed under [Mozilla Public License 2.0](LICENSE)
