@@ -6,8 +6,8 @@ builds:
       - CGO_ENABLED=0
     goos:
       - linux
-      - windows
-      - darwin
+    ldflags:
+      - -s -w -X main.version={{.Tag}} -X main.goversion={{GOVERSION}}
 archives:
   - replacements:
       darwin: Darwin
@@ -30,5 +30,5 @@ changelog:
       - '^test:'
 announce:
   twitter:
-    enabled: true
+    enabled: false
     message_template: 'Hey "{{ .ProjectName }}" {{ .Tag }} is out! You can check it out at {{ .ReleaseURL }}!!'
