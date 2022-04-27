@@ -19,9 +19,10 @@ type App struct {
 	Mtx         *sync.Mutex
 }
 
+// Home provides basic instruction on how to poll the datasources hosted by the application as text format.
 func (a *App) Home(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "text/text")
+	w.Header().Set("Content-Type", "text/plain")
 
 	res := "Dujour - JSON/CSV Data Server\n"
 	res += "=============================\n\n"
@@ -35,6 +36,7 @@ func (a *App) Home(w http.ResponseWriter, _ *http.Request) {
 	_, _ = fmt.Fprint(w, res)
 }
 
+// ListDatasources provides a summary of datasources hosted by the application in JSON format
 func (a *App) ListDatasources(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
@@ -71,6 +73,7 @@ func (a *App) ListDatasources(w http.ResponseWriter, _ *http.Request) {
 	_, _ = fmt.Fprint(w, string(res))
 }
 
+// DatasourceGetAll will retrieve all data for a datasource in JSON format
 func (a *App) DatasourceGetAll(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
@@ -109,7 +112,7 @@ func (a *App) DatasourceGetAll(w http.ResponseWriter, r *http.Request) {
 	_, _ = fmt.Fprint(w, string(res))
 }
 
-// DatasourceGetByID will process a request for a datasource and return the element that matches the ID
+// DatasourceGetByID will process a request for a datasource and return the element that matches the ID in JSON format
 func (a *App) DatasourceGetByID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
