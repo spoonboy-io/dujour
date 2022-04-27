@@ -17,6 +17,10 @@
 Dujour is a JSON/CSV data file server. It supports any usecase in which simple transformation of JSON and CSV data to a web 
 consumable JSON REST API is a requirement.
 
+## Releases
+
+You can find the [latest software here](https://github.com/spoonboy-io/dujour/releases/latest).
+
 ### Features
 
 - Automatic self-signed TLS certificate (or use your own)
