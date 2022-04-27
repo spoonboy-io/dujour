@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -89,9 +90,9 @@ func main() {
 	// we need three handlers, they need logger and datasources
 	mux := mux.NewRouter()
 	app := &routes.App{
-		logger,
-		datasources,
-		mtx,
+		Logger:      logger,
+		Datasources: datasources,
+		Mtx:         mtx,
 	}
 
 	mux.HandleFunc(`/`, app.Home).Methods("GET")
@@ -100,7 +101,7 @@ func main() {
 	mux.HandleFunc("/{datasource:[a-zA-Z0-9=\\-\\/]+}", app.DatasourceGetAll).Methods("GET")
 
 	// create a server running as service
-	hostPort := fmt.Sprintf("%s:%s", internal.SRV_HOST, internal.SRV_PORT)
+	hostPort := net.JoinHostPort(internal.SRV_HOST, internal.SRV_PORT)
 	srvTLS := &http.Server{
 		Addr:         hostPort,
 		Handler:      mux,

@@ -29,11 +29,10 @@ func FindFiles(dataFolder string, logger *koan.Logger) ([]string, error) {
 
 		if (extension == ".csv") || (extension == ".json") {
 			files = append(files, s)
-		} else {
-			if extension != "" {
-				logger.Warn(fmt.Sprintf("Skipping file '%s/%s', file extension is '%s'", dataFolder, f.Name(), extension))
-			}
+		} else if extension != "" {
+			logger.Warn(fmt.Sprintf("Skipping file '%s/%s', file extension is '%s'", dataFolder, f.Name(), extension))
 		}
+
 		return nil
 	})
 
