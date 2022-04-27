@@ -41,7 +41,7 @@ This endpoint will retrieve all users:
 GET $serverUrl:18651/users
 ```
 
-####Get a specific user
+#### Get a specific user
 This endpoint will retrieve a specific user:
 ```
 GET $serverUrl:18651/users/$id
