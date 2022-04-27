@@ -7,7 +7,7 @@ builds:
     goos:
       - linux
     ldflags:
-      - -s -w -X main.version={{.Tag}} -X main.goversion={{GOVERSION}}
+      - -s -w -X main.version={{.Tag}} -X main.goversion=1.18
     main: ./cmd/dujour
 archives:
   - replacements:
