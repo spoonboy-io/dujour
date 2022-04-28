@@ -135,7 +135,7 @@ func TestLoadAndValidate(t *testing.T) {
 		testFileContent string
 		testDatasource  internal.Datasource
 		wantDatasource  internal.Datasource
-		wantErr         error
+		wantErr         bool
 	}{
 		{
 			name:            "a csv file with simple content",
@@ -156,10 +156,31 @@ func TestLoadAndValidate(t *testing.T) {
 					{"id": "2", "name": "Test2", "age": "25"},
 				},
 			},
-			wantErr: nil,
+			wantErr: false,
 		},
 		{
-			name:            "a json file with simple content",
+			name:            "a csv file with quoted content",
+			dataFolder:      "data",
+			testFile:        "simple.csv",
+			testFileContent: "\"id\",\"name\",\"age\"\n\"1\",\"Test\",\"100\"\n\"2\",\"Test2\",\"25\"",
+			testDatasource: internal.Datasource{
+				FileName:     "data/simple.csv",
+				FileType:     internal.TYPE_CSV,
+				EndpointName: "simple",
+			},
+			wantDatasource: internal.Datasource{
+				FileName:     "data/simple.csv",
+				FileType:     internal.TYPE_CSV,
+				EndpointName: "simple",
+				Data: []map[string]string{
+					{"id": "1", "name": "Test", "age": "100"},
+					{"id": "2", "name": "Test2", "age": "25"},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name:            "a json array file with simple content",
 			dataFolder:      "data",
 			testFile:        "simple.json",
 			testFileContent: "[{\"id\": 1, \"name\": \"Test\", \"age\": 100},{\"id\": 2, \"name\": \"Test2\", \"age\": 25}]",
@@ -177,7 +198,30 @@ func TestLoadAndValidate(t *testing.T) {
 					{"id": 2, "name": "Test2", "age": 25},
 				},
 			},
-			wantErr: nil,
+			wantErr: false,
+		},
+		{
+			name:            "a json object file with simple content",
+			dataFolder:      "data",
+			testFile:        "simple.json",
+			testFileContent: "{\"result\":[{\"id\": 1, \"name\": \"Test\", \"age\": 100},{\"id\": 2, \"name\": \"Test2\", \"age\": 25}]}",
+			testDatasource: internal.Datasource{
+				FileName:     "data/simple.json",
+				FileType:     internal.TYPE_JSON,
+				EndpointName: "simple",
+			},
+			wantDatasource: internal.Datasource{
+				FileName:     "data/simple.json",
+				FileType:     internal.TYPE_JSON,
+				EndpointName: "simple",
+				Data: map[string]interface{}{
+					"result": []map[string]interface{}{
+						{"id": 1, "name": "Test", "age": 100},
+						{"id": 2, "name": "Test2", "age": 25},
+					},
+				},
+			},
+			wantErr: false,
 		},
 	}
 
@@ -195,8 +239,12 @@ func TestLoadAndValidate(t *testing.T) {
 
 			gotDatasource, err := file.LoadAndValidate(tc.testDatasource, testLogger)
 
-			if err != tc.wantErr {
-				t.Errorf("failed got %v wanted %v", err, tc.wantErr)
+			if err != nil {
+				if !tc.wantErr {
+					t.Errorf("failed got err %v did not want", err)
+				}
+			} else if tc.wantErr {
+				t.Errorf("failed got nil wanted error")
 			}
 
 			if !reflect.DeepEqual(gotDatasource, tc.wantDatasource) {
@@ -255,23 +303,3 @@ func removeTestFolder(folder string) error {
 	}
 	return nil
 }
-
-/*
-
-package main
-
-import (
-    "fmt"
-    "reflect"
-)
-
-func main() {
-    a := []int {4,5,6}
-    b := []int {4,5,6}
-    c := []int {4,5,6,7}
-
-    fmt.Println(reflect.DeepEqual(a, b))
-    fmt.Println(reflect.DeepEqual(a, c))
-
-}
-*/
