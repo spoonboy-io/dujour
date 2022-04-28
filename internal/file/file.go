@@ -49,6 +49,8 @@ func InitDatasource(file string) internal.Datasource {
 
 	_, filename := filepath.Split(file)
 	endpointName := strings.Replace(filename, filepath.Ext(file), "", 1)
+	endpointName = strings.Replace(strings.ToLower(endpointName), "_", "-", -1)
+	endpointName = strings.Replace(endpointName, " ", "-", -1)
 	ds := internal.Datasource{
 		FileName:     file,
 		FileType:     fileType,

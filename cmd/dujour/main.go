@@ -96,8 +96,8 @@ func main() {
 
 	mux.HandleFunc(`/`, app.Home).Methods("GET")
 	mux.HandleFunc(`/list`, app.ListDatasources).Methods("GET")
-	mux.HandleFunc("/{datasource:[a-zA-Z0-9=\\-\\/]+}/{id:[a-zA-Z0-9=\\-\\/]+}", app.DatasourceGetByID).Methods("GET")
-	mux.HandleFunc("/{datasource:[a-zA-Z0-9=\\-\\/]+}", app.DatasourceGetAll).Methods("GET")
+	mux.HandleFunc("/{datasource:[a-z0-9=\\-\\/]+}/{id:[a-zA-Z0-9=\\-\\/]+}", app.DatasourceGetByID).Methods("GET")
+	mux.HandleFunc("/{datasource:[a-z0-9=\\-\\/]+}", app.DatasourceGetAll).Methods("GET")
 
 	// create a server running as service
 	hostPort := net.JoinHostPort(internal.SRV_HOST, internal.SRV_PORT)
