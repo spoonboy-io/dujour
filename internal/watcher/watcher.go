@@ -1,3 +1,5 @@
+// Package watcher monitors a data folder and performs automatic reloading of data
+// including updating the datasource cache in memory for deleted and edited data files
 package watcher
 
 import (

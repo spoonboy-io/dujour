@@ -1,3 +1,4 @@
+// Package certificate provides code to create and write a self-signed TLS certificate
 package certificate
 
 import (

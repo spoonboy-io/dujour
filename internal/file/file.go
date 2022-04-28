@@ -1,3 +1,4 @@
+// Package file performs operations related to file discovery, validation, conversion and load to the cache
 package file
 
 import (

@@ -1,3 +1,4 @@
+// Package routes contains all the handlers used in the application
 package routes
 
 import (
