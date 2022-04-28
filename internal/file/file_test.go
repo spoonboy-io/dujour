@@ -248,8 +248,8 @@ func TestLoadAndValidate(t *testing.T) {
 			}
 
 			if !reflect.DeepEqual(gotDatasource, tc.wantDatasource) {
-				// DeepEqual won't like work for interface{} comparisons to string/int/bool, so also inspect encoded JSON
-				// if we fail
+				// DeepEqual won't like work for interface{} comparisons to string/int/bool, so also
+				// inspect encoded JSON if we fail
 				gotJSON, _ := json.Marshal(gotDatasource.Data)
 				wantJSON, _ := json.Marshal(tc.wantDatasource.Data)
 				if string(gotJSON) != string(wantJSON) {
@@ -264,10 +264,6 @@ func TestLoadAndValidate(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestLoadAndValidateDatasources(t *testing.T) {
-
 }
 
 func makeTestFolder(folder string) error {
