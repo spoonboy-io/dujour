@@ -15,19 +15,22 @@
 ## About
 
 Dujour is a JSON/CSV data file server. It supports any usecase in which simple transformation of JSON and CSV data to a web 
-consumable API is a requirement.
+consumable JSON REST API is a requirement.
+
+## Releases
+
+You can find the [latest software here](https://github.com/spoonboy-io/dujour/releases/latest).
 
 ### Features
 
 - Automatic self-signed TLS certificate (or use your own)
-- Data is served from memory cache
-- Supports any number of *.json and *.csv files
-- Hot reload, new or edited data, with no restarts
-
+- Supports CSV files. Application will parse them to JSON
+- Supports any number of JSON or CSV data files, memory being the only constraint
+- Hot reload. New or edited data can be added with no server restart needed
+- Data is served from memory. Fast
 
 ### Usage
-Add `.json` and `.csv` data files to the `data` directory and Dujour will automatically load, validate and serve each data file as a REST API endpoint
-in JSON format.
+Add `.json` and `.csv` data files to the `data` directory and Dujour will automatically load, validate and serve each data file at two REST API endpoints in JSON format.
 
 In each data file, element/row data should contain an `id` key/column which should be unique in the dataset.
 
@@ -41,14 +44,14 @@ This endpoint will retrieve all users:
 GET $serverUrl:18651/users
 ```
 
-####Get a specific user
+#### Get a specific user
 This endpoint will retrieve a specific user:
 ```
 GET $serverUrl:18651/users/$id
 ```
 
 ### Installation
-Grab the tar.gz or zip archive for your OS from the [releases page here]((https://github.com/spoonboy-io/dujour/releases/latest).
+Grab the tar.gz or zip archive for your OS from the [releases page](https://github.com/spoonboy-io/dujour/releases/latest).
 
 Unpack it to the target host, and then start the server!
 
