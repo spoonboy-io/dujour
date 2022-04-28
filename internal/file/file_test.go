@@ -1,6 +1,7 @@
 package file_test
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -14,7 +15,7 @@ import (
 
 func TestFindFiles(t *testing.T) {
 
-	logger := &koan.Logger{}
+	testLogger := &koan.Logger{}
 	testCases := []struct {
 		name       string
 		dataFolder string
@@ -48,7 +49,7 @@ func TestFindFiles(t *testing.T) {
 				t.Fatalf("TestFindfiles could not create the test files: %v", err)
 			}
 
-			gotFiles, err := file.FindFiles(tc.dataFolder, logger)
+			gotFiles, err := file.FindFiles(tc.dataFolder, testLogger)
 			if err != nil {
 				t.Fatalf("Findfiles unexpected error: %v", err)
 			}
@@ -123,6 +124,104 @@ func TestInitDatasource(t *testing.T) {
 	}
 }
 
+func TestLoadAndValidate(t *testing.T) {
+
+	testLogger := &koan.Logger{}
+
+	testCases := []struct {
+		name            string
+		dataFolder      string
+		testFile        string
+		testFileContent string
+		testDatasource  internal.Datasource
+		wantDatasource  internal.Datasource
+		wantErr         error
+	}{
+		{
+			name:            "a csv file with simple content",
+			dataFolder:      "data",
+			testFile:        "simple.csv",
+			testFileContent: "id,name,age\n1,Test,100\n2,Test2,25",
+			testDatasource: internal.Datasource{
+				FileName:     "data/simple.csv",
+				FileType:     internal.TYPE_CSV,
+				EndpointName: "simple",
+			},
+			wantDatasource: internal.Datasource{
+				FileName:     "data/simple.csv",
+				FileType:     internal.TYPE_CSV,
+				EndpointName: "simple",
+				Data: []map[string]string{
+					{"id": "1", "name": "Test", "age": "100"},
+					{"id": "2", "name": "Test2", "age": "25"},
+				},
+			},
+			wantErr: nil,
+		},
+		{
+			name:            "a json file with simple content",
+			dataFolder:      "data",
+			testFile:        "simple.json",
+			testFileContent: "[{\"id\": 1, \"name\": \"Test\", \"age\": 100},{\"id\": 2, \"name\": \"Test2\", \"age\": 25}]",
+			testDatasource: internal.Datasource{
+				FileName:     "data/simple.json",
+				FileType:     internal.TYPE_JSON,
+				EndpointName: "simple",
+			},
+			wantDatasource: internal.Datasource{
+				FileName:     "data/simple.json",
+				FileType:     internal.TYPE_JSON,
+				EndpointName: "simple",
+				Data: []map[string]interface{}{
+					{"id": 1, "name": "Test", "age": 100},
+					{"id": 2, "name": "Test2", "age": 25},
+				},
+			},
+			wantErr: nil,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// create the folder
+			if err := makeTestFolder(tc.dataFolder); err != nil {
+				t.Fatalf("TestLoadAndValidate could not create the test folder: %v", err)
+			}
+
+			// add the file
+			if err := createTestFileWithContent(tc.testFile, tc.testFileContent, tc.dataFolder); err != nil {
+				t.Fatalf("TestLoadAndValidate could not create the test file: %v", err)
+			}
+
+			gotDatasource, err := file.LoadAndValidate(tc.testDatasource, testLogger)
+
+			if err != tc.wantErr {
+				t.Errorf("failed got %v wanted %v", err, tc.wantErr)
+			}
+
+			if !reflect.DeepEqual(gotDatasource, tc.wantDatasource) {
+				// DeepEqual won't like work for interface{} comparisons to string/int/bool, so also inspect encoded JSON
+				// if we fail
+				gotJSON, _ := json.Marshal(gotDatasource.Data)
+				wantJSON, _ := json.Marshal(tc.wantDatasource.Data)
+				if string(gotJSON) != string(wantJSON) {
+					// a fail
+					t.Errorf("failed got %v wanted %v", gotDatasource, tc.wantDatasource)
+				}
+			}
+
+			// tear down
+			if err := removeTestFolder(tc.dataFolder); err != nil {
+				t.Fatalf("TestLoadAndValidate remove test folder %v", err)
+			}
+		})
+	}
+}
+
+func TestLoadAndValidateDatasources(t *testing.T) {
+
+}
+
 func makeTestFolder(folder string) error {
 	dataPath := filepath.Join(".", folder)
 	if err := os.MkdirAll(dataPath, os.ModePerm); err != nil {
@@ -137,6 +236,14 @@ func createTestFiles(files []string, folder string) error {
 		if err := os.WriteFile(dataPath, []byte("sample data"), 0644); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+func createTestFileWithContent(file, content, folder string) error {
+	dataPath := filepath.Join(".", folder, "/", file)
+	if err := os.WriteFile(dataPath, []byte(content), 0644); err != nil {
+		return err
 	}
 	return nil
 }
