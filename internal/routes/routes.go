@@ -33,7 +33,7 @@ func (a *App) Home(w http.ResponseWriter, _ *http.Request) {
 	res += "GET /{datasource} \t- JSON representing all elements/rows for requested {datasource} or 404\n"
 	res += "GET /{datasource}/{id} \t- JSON representing element/row matching {id} from requested {datasource} or 404\n"
 
-	a.Logger.Info("Served GET / reques - 200 OK")
+	a.Logger.Info("Served GET / request - 200 OK")
 	_, _ = fmt.Fprint(w, res)
 }
 
