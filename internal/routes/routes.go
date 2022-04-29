@@ -20,6 +20,12 @@ type App struct {
 	Mtx         *sync.Mutex
 }
 
+// this is the information we will output for list
+type listDS struct {
+	Endpoint string `json:"endpoint"`
+	Source   string `json:"source"`
+}
+
 // Home provides basic instruction on how to poll the datasources hosted by the application as text format.
 func (a *App) Home(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -41,12 +47,6 @@ func (a *App) Home(w http.ResponseWriter, _ *http.Request) {
 func (a *App) ListDatasources(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
-
-	// this is the information we will output for list
-	type listDS struct {
-		Endpoint string `json:"endpoint"`
-		Source   string `json:"source"`
-	}
 
 	list := []listDS{}
 
@@ -104,6 +104,7 @@ func (a *App) DatasourceGetAll(w http.ResponseWriter, r *http.Request) {
 		logMsg := fmt.Sprintf("Served GET /%s request - 404 Not Found", dsReq)
 		a.Logger.Info(logMsg)
 		w.WriteHeader(http.StatusNotFound)
+		_, _ = fmt.Fprint(w, "404 page not found")
 		return
 	}
 
@@ -226,6 +227,7 @@ func (a *App) DatasourceGetByID(w http.ResponseWriter, r *http.Request) {
 		logMsg := fmt.Sprintf("Served GET /%s/%s request - 404 Not Found", dsReq, id)
 		a.Logger.Info(logMsg)
 		w.WriteHeader(http.StatusNotFound)
+		_, _ = fmt.Fprint(w, "404 page not found")
 		return
 	}
 
