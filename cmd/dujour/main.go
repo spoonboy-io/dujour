@@ -45,7 +45,7 @@ func init() {
 	}
 
 	// add self-signed certificate only if folder empty, if the cert expires it
-	// it can be deleted so the code here create a new cert.pem and key.pem files
+	// it can be deleted so the code here creates a new cert.pem and key.pem file
 	checkExist := fmt.Sprintf("%s/cert.pem", internal.TLS_FOLDER)
 	if _, err := os.Stat(checkExist); errors.Is(err, os.ErrNotExist) {
 		logger.Info("Creating self-signed TLS certificate for the server")
@@ -86,7 +86,7 @@ func main() {
 		}
 	}()
 
-	// we need three handlers, they need logger and datasources
+	// handlers
 	mux := mux.NewRouter()
 	app := &routes.App{
 		Logger:      logger,
@@ -99,7 +99,7 @@ func main() {
 	mux.HandleFunc("/{datasource:[a-z0-9=\\-\\/]+}/{id:[a-zA-Z0-9=\\-\\/]+}", app.DatasourceGetByID).Methods("GET")
 	mux.HandleFunc("/{datasource:[a-z0-9=\\-\\/]+}", app.DatasourceGetAll).Methods("GET")
 
-	// create a server running as service
+	// create a server
 	hostPort := net.JoinHostPort(internal.SRV_HOST, internal.SRV_PORT)
 	srvTLS := &http.Server{
 		Addr:         hostPort,
@@ -114,6 +114,3 @@ func main() {
 		logger.FatalError("Failed to start HTTPS server", err)
 	}
 }
-
-// TODO
-// get tests in place on the work done so far
