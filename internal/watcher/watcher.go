@@ -31,6 +31,29 @@ func Monitor(datasources map[string]internal.Datasource, logger *koan.Logger, mt
 	done := make(chan bool)
 	go func() {
 		defer close(done)
+
+		var processAdd = func(event fsnotify.Event) {
+			extension := strings.ToLower(filepath.Ext(event.Name))
+			if (extension != ".csv") && (extension != ".json") {
+				if extension != "" {
+					logger.Warn(fmt.Sprintf("Hotloader skipping file '%s', file extension is '%s'", event.Name, extension))
+					return
+				}
+			}
+
+			// init & validate the file
+			var hlds internal.Datasource
+			var err error
+			if hlds, err = file.LoadAndValidate(file.InitDatasource(event.Name), logger); err != nil {
+				logger.Error(fmt.Sprintf("Could not hotload datasource '%s'", event.Name), err)
+			}
+
+			// add the datasource
+			mtx.Lock()
+			datasources[event.Name] = hlds
+			mtx.Unlock()
+		}
+
 		for {
 			select {
 			case event, ok := <-watcher.Events:
@@ -39,29 +62,15 @@ func Monitor(datasources map[string]internal.Datasource, logger *koan.Logger, mt
 				}
 				switch event.Op {
 				case fsnotify.Create:
-					logger.Info(fmt.Sprintf("File added '%s'", event.Name))
-
-					// is it a file we want to process
-					extension := strings.ToLower(filepath.Ext(event.Name))
-					if (extension != ".csv") && (extension != ".json") {
-						if extension != "" {
-							logger.Warn(fmt.Sprintf("Hotloader skipping file '%s', file extension is '%s'", event.Name, extension))
-							continue
-						}
-					}
-
-					// init & validate the file
-					var hlds internal.Datasource
-					var err error
-					if hlds, err = file.LoadAndValidate(file.InitDatasource(event.Name), logger); err != nil {
-						logger.Error(fmt.Sprintf("Could not hotload datasource '%s'", event.Name), err)
-					}
-
-					// add the datasource
-					mtx.Lock()
-					datasources[event.Name] = hlds
-					mtx.Unlock()
-				case fsnotify.Rename, fsnotify.Remove:
+					logger.Info(fmt.Sprintf("Hotloader file added '%s'", event.Name))
+					processAdd(event)
+				case fsnotify.Write:
+					logger.Info(fmt.Sprintf("Hotloader file written '%s'", event.Name))
+					processAdd(event)
+				case fsnotify.Chmod:
+					logger.Info(fmt.Sprintf("Hotloader file written '%s'", event.Name))
+					processAdd(event)
+				case fsnotify.Remove, fsnotify.Rename:
 					logger.Info(fmt.Sprintf("Hotloader file removed '%s'", event.Name))
 					// remove
 					mtx.Lock()
