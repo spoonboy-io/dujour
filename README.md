@@ -61,5 +61,10 @@ To update, stop the server, replace the binary, start the server.
 
 Dujour does not perform mutations on the data files. Only `GET` operations are supported.
 
+### Development Opportunities
+
+- Support CRUD operations on the data
+- Run the application as a service
+
 ### License
 Licensed under [Mozilla Public License 2.0](LICENSE)
