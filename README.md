@@ -57,9 +57,11 @@ Unpack it to the target host, and then start the server.
 
 ```
 ./dujour
+```
 
-// or with nohup
+Or with nohup..
 
+```
 nohup ./dujour &
 ```
 
