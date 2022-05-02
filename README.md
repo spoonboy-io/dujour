@@ -53,13 +53,22 @@ GET $serverUrl:18651/users/$id
 ### Installation
 Grab the tar.gz or zip archive for your OS from the [releases page](https://github.com/spoonboy-io/dujour/releases/latest).
 
-Unpack it to the target host, and then start the server!
+Unpack it to the target host, and then start the server.
 
-To update, stop the server, replace the binary, start the server.
+```
+./dujour
+
+// or with nohup
+
+nohup ./dujour &
+```
+
+To update the application server, stop the server, replace the binary, then start the server.
 
 ### Limitations
 
-Dujour does not perform mutations on the data files. Only `GET` operations are supported.
+- Dujour does not perform mutations on the data files. Only `GET` operations are supported.
+- To  
 
 ### Development Opportunities
 
