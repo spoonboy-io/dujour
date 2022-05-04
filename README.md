@@ -70,7 +70,6 @@ To update the application server, stop the server, replace the binary, then star
 ### Limitations
 
 - Dujour does not perform mutations on the data files. Only `GET` operations are supported.
-- To  
 
 ### Development Opportunities
 
