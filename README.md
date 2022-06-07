@@ -15,7 +15,7 @@
 ## About
 
 Dujour is a JSON/CSV data file server. It supports any usecase in which simple transformation of JSON and CSV data to a web 
-consumable JSON REST API is a requirement.
+consumable JSON REST API is a requirement. Dujour was developed with Morpheus Option Lists in-mind, providing a way to host data for those lists, internally on the private network.
 
 ## Releases
 
