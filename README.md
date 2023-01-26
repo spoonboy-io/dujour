@@ -13,7 +13,7 @@
 ## About
 
 Dujour is a JSON/CSV data file server. It supports any usecase in which simple transformation of JSON and CSV data to a web 
-consumable JSON REST API is a requirement.
+consumable JSON REST API is a requirement. Dujour was developed with Morpheus Option Lists in-mind, providing a way to host data for those lists, internally on the private network.
 
 ## Releases
 
@@ -51,13 +51,23 @@ GET $serverUrl:18651/users/$id
 ### Installation
 Grab the tar.gz or zip archive for your OS from the [releases page](https://github.com/spoonboy-io/dujour/releases/latest).
 
-Unpack it to the target host, and then start the server!
+Unpack it to the target host, and then start the server.
 
-To update, stop the server, replace the binary, start the server.
+```
+./dujour
+```
+
+Or with nohup..
+
+```
+nohup ./dujour &
+```
+
+To update the application server, stop the server, replace the binary, then start the server.
 
 ### Limitations
 
-Dujour does not perform mutations on the data files. Only `GET` operations are supported.
+- Dujour does not perform mutations on the data files. Only `GET` operations are supported.
 
 ### Development Opportunities
 
