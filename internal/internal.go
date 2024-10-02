@@ -1,6 +1,9 @@
 package internal
 
-import "time"
+import (
+	"errors"
+	"time"
+)
 
 const (
 	// server
@@ -28,3 +31,13 @@ type Datasource struct {
 	EndpointName string
 	Data         interface{}
 }
+
+var (
+	// TODO should do this for all error messages in the app
+	ERR_NO_USER     = errors.New("username is required")
+	ERR_NO_PORT     = errors.New("port number is required")
+	ERR_NO_HOST     = errors.New("hostname or ip address is required")
+	ERR_NO_PASSWORD = errors.New("password is required for authentication")
+	ERR_NO_QUERY    = errors.New("SQL query is required")
+	ERR_NOT_ACTIVE  = errors.New("DB config file is not active, skipping")
+)

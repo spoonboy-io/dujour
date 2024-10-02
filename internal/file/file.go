@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/spoonboy-io/dujour/internal/database"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/spoonboy-io/dujour/internal"
 	"github.com/spoonboy-io/koan"
+	yaml "gopkg.in/yaml.v2"
 )
 
 // FindFiles identifies all JSON and CSV files in the target dataFolder, files which
@@ -28,7 +30,7 @@ func FindFiles(dataFolder string, logger *koan.Logger) ([]string, error) {
 
 		extension := strings.ToLower(filepath.Ext(f.Name()))
 
-		if (extension == ".csv") || (extension == ".json") || (extension == "dbyaml") {
+		if (extension == ".csv") || (extension == ".json") || (extension == ".dbyaml") {
 			files = append(files, s)
 		} else if extension != "" {
 			logger.Warn(fmt.Sprintf("Skipping file '%s/%s', file extension is '%s'", dataFolder, f.Name(), extension))
@@ -49,7 +51,7 @@ func InitDatasource(file string) internal.Datasource {
 	}
 
 	if ext == ".dbyaml" {
-		// file contain will contain configuration as opposed to data
+		// file will contain configuration as opposed to data
 		fileType = internal.TYPE_DB_QUERY
 	}
 
@@ -81,7 +83,11 @@ func LoadAndValidateDatasources(dataFolder string, logger *koan.Logger) (map[str
 		ds := InitDatasource(fv)
 		ds, err := LoadAndValidate(ds, logger)
 		if err != nil {
-			logger.Error(fmt.Sprintf("Could not load datasource '%s'", fv), err)
+			if err != internal.ERR_NOT_ACTIVE {
+				logger.Error(fmt.Sprintf("Could not load datasource or config'%s'", fv), err)
+			} else {
+				logger.Warn("Inactive 'dbyaml' file, skipping")
+			}
 			continue
 		}
 		datasources[fv] = ds
@@ -139,16 +145,32 @@ func LoadAndValidate(ds internal.Datasource, logger *koan.Logger) (internal.Data
 		// then connect and run the query, then process the output to JSON
 
 		// load the config
-		data, err = os.ReadFile(ds.FileName)
+		yamlConfig, err := os.ReadFile(ds.FileName)
 		if err != nil {
 			return ds, err
 		}
 
-		// parse to a db config object & validate
+		// parse to a db config object
+		dbConfig := database.DbConfig{}
+		if err := yaml.Unmarshal(yamlConfig, dbConfig); err != nil {
+			return ds, err
+		}
 
-		// connect and run the query
+		if dbConfig.Active {
+			// validate
+			if err := database.CheckConfig(&dbConfig); err != nil {
+				return ds, err
+			}
 
-		// marshal response to JSON
+			// connect and run the query
+
+			// marshal response to JSON
+
+			// add to datastore
+
+		} else {
+			return ds, internal.ERR_NOT_ACTIVE
+		}
 
 	}
 
