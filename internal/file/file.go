@@ -28,7 +28,7 @@ func FindFiles(dataFolder string, logger *koan.Logger) ([]string, error) {
 
 		extension := strings.ToLower(filepath.Ext(f.Name()))
 
-		if (extension == ".csv") || (extension == ".json") {
+		if (extension == ".csv") || (extension == ".json") || (extension == "dbyaml") {
 			files = append(files, s)
 		} else if extension != "" {
 			logger.Warn(fmt.Sprintf("Skipping file '%s/%s', file extension is '%s'", dataFolder, f.Name(), extension))
@@ -46,6 +46,11 @@ func InitDatasource(file string) internal.Datasource {
 	fileType := internal.TYPE_JSON
 	if ext == ".csv" {
 		fileType = internal.TYPE_CSV
+	}
+
+	if ext == ".dbyaml" {
+		// file contain will contain configuration as opposed to data
+		fileType = internal.TYPE_DB_QUERY
 	}
 
 	_, filename := filepath.Split(file)
@@ -128,6 +133,23 @@ func LoadAndValidate(ds internal.Datasource, logger *koan.Logger) (internal.Data
 			// it was an array
 			ds.Data = arr
 		}
+	case internal.TYPE_DB_QUERY:
+		// we have a file containing db query and config
+		// we don't parse it as data, but read it, validate it and
+		// then connect and run the query, then process the output to JSON
+
+		// load the config
+		data, err = os.ReadFile(ds.FileName)
+		if err != nil {
+			return ds, err
+		}
+
+		// parse to a db config object & validate
+
+		// connect and run the query
+
+		// marshal response to JSON
+
 	}
 
 	logger.Info(fmt.Sprintf("Successfully loaded file '%s'", ds.FileName))

@@ -11,8 +11,9 @@ const (
 	DATA_FOLDER = "data"
 
 	// storage
-	TYPE_CSV  = 1
-	TYPE_JSON = 2
+	TYPE_CSV      = 1
+	TYPE_JSON     = 2
+	TYPE_DB_QUERY = 3
 
 	// tls configuration
 	TLS_FOLDER    = "certs"
